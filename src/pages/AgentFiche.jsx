@@ -2,12 +2,17 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { AgentForm } from './Personnel'
+import { useAuth } from '../auth'
 import { fmtDate, fmtDateTime, ETATS, DOMAINES, TYPES_SESSION, STATUTS_PART, nomComplet } from '../lib'
 
 const VIDE_Q = { referentiel_id: '', date_obtention: '', date_dernier_recyclage: '', suspendu: false, commentaire: '' }
 
-export default function AgentFiche() {
-  const { id } = useParams()
+export default function AgentFiche({ id: idProp, monSuivi = false }) {
+  const params = useParams()
+  const id = idProp ?? params.id
+  const { d } = useAuth()
+  const peutQualifs = d.gererFormation && !monSuivi
+  const peutAgent = d.admin && !monSuivi
   const nav = useNavigate()
   const [agent, setAgent] = useState(null)
   const [quals, setQuals] = useState([])
@@ -63,13 +68,15 @@ export default function AgentFiche() {
 
   return (
     <>
-      <p><Link to="/personnel">← Personnel</Link></p>
+      {!monSuivi && d.lireTout && <p><Link to="/personnel">← Personnel</Link></p>}
       <div className="page-head">
-        <h1>{nomComplet(agent)} {!agent.actif && <span className="badge muted">Inactif</span>}</h1>
-        <div className="actions">
-          <button className="ghost" onClick={() => setEdit(!edit)}>Modifier</button>
-          <button className="ghost danger" onClick={delAgent}>Supprimer</button>
-        </div>
+        <h1>{monSuivi ? 'Mon suivi — ' : ''}{nomComplet(agent)} {!agent.actif && <span className="badge muted">Inactif</span>}</h1>
+        {peutAgent && (
+          <div className="actions">
+            <button className="ghost" onClick={() => setEdit(!edit)}>Modifier</button>
+            <button className="ghost danger" onClick={delAgent}>Supprimer</button>
+          </div>
+        )}
       </div>
       {edit ? <AgentForm initial={agent} onSaved={() => { setEdit(false); load() }} onCancel={() => setEdit(false)} /> : (
         <div className="card infos">
@@ -92,7 +99,7 @@ export default function AgentFiche() {
       <section className="card">
         <div className="page-head">
           <h2>Qualifications</h2>
-          <button onClick={() => setQForm({ ...VIDE_Q })}>+ Ajouter</button>
+          {peutQualifs && <button onClick={() => setQForm({ ...VIDE_Q })}>+ Ajouter</button>}
         </div>
         {qForm && (
           <form className="form sub" onSubmit={saveQ}>
@@ -127,8 +134,10 @@ export default function AgentFiche() {
                 <td>{fmtDate(q.date_dernier_recyclage)}</td><td>{fmtDate(q.date_echeance)}</td>
                 <td><span className={`badge ${ETATS[q.etat].cls}`}>{ETATS[q.etat].label}</span></td>
                 <td className="nowrap">
-                  <button className="link" onClick={() => setQForm({ ...q })}>Modifier</button>
-                  <button className="link danger" onClick={() => delQ(q)}>Suppr.</button>
+                  {peutQualifs && <>
+                    <button className="link" onClick={() => setQForm({ ...q })}>Modifier</button>
+                    <button className="link danger" onClick={() => delQ(q)}>Suppr.</button>
+                  </>}
                 </td>
               </tr>
             ))}
