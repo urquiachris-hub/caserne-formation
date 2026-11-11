@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { exportCSV } from '../lib'
+import { useAuth } from '../auth'
 
 export const VIDE_AGENT = { matricule: '', nom: '', prenom: '', grade: '', statut: 'SPV', date_entree: '', email: '', telephone: '', actif: true }
 
@@ -52,6 +53,7 @@ export function AgentForm({ initial, onSaved, onCancel }) {
 }
 
 export default function Personnel() {
+  const { d } = useAuth()
   const [agents, setAgents] = useState([])
   const [q, setQ] = useState('')
   const [inactifs, setInactifs] = useState(false)
@@ -92,8 +94,8 @@ export default function Personnel() {
       <div className="page-head">
         <h1>Personnel</h1>
         <div className="actions">
-          <button onClick={() => setAjout(true)}>+ Ajouter un agent</button>
-          <label className="button ghost">Importer CSV<input type="file" accept=".csv" hidden onChange={importer} /></label>
+          {d.admin && <button onClick={() => setAjout(true)}>+ Ajouter un agent</button>}
+          {d.admin && <label className="button ghost">Importer CSV<input type="file" accept=".csv" hidden onChange={importer} /></label>}
           <button className="ghost" onClick={() => exportCSV('personnel.csv', liste.map(({ qualifications, user_id, ...r }) => r))}>Exporter</button>
         </div>
       </div>

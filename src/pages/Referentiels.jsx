@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 import { DOMAINES } from '../lib'
+import { useAuth } from '../auth'
 
 const VIDE = { code: '', libelle: '', domaine: 'SAP', periodicite_mois: 12, heures_fc_annuelles: '', prerequis_id: '', ordre: 100, actif: true }
 
 export default function Referentiels() {
+  const { d } = useAuth()
   const [refs, setRefs] = useState([])
   const [form, setForm] = useState(null)
   const [err, setErr] = useState(null)
@@ -34,7 +36,7 @@ export default function Referentiels() {
     <>
       <div className="page-head">
         <h1>Référentiels</h1>
-        <button onClick={() => setForm({ ...VIDE })}>+ Nouveau référentiel</button>
+        {d.admin && <button onClick={() => setForm({ ...VIDE })}>+ Nouveau référentiel</button>}
       </div>
       <p className="muted">Périodicités et heures de formation continue à aligner sur le règlement de formation de votre SDIS.</p>
       {form && (
@@ -79,7 +81,7 @@ export default function Referentiels() {
                     <td>{r.periodicite_mois ? `${r.periodicite_mois} mois` : 'Permanent'}</td>
                     <td>{r.heures_fc_annuelles ? `${r.heures_fc_annuelles} h` : '—'}</td>
                     <td>{refs.find((x) => x.id === r.prerequis_id)?.code || '—'}</td>
-                    <td><button className="link" onClick={() => setForm({ ...r })}>Modifier</button></td>
+                    <td>{d.admin && <button className="link" onClick={() => setForm({ ...r })}>Modifier</button>}</td>
                   </tr>
                 ))}
               </tbody>
