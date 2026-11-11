@@ -36,7 +36,7 @@ export default function Emplois() {
     <>
       <div className="page-head">
         <h1>Emplois &amp; qualifications</h1>
-        {d.admin && <button onClick={() => setForm({ ...VIDE })}>+ Nouvel emploi</button>}
+        {d.gererFormation && <button onClick={() => setForm({ ...VIDE })}>+ Nouvel emploi</button>}
       </div>
       <p className="muted">Emplois et qualifications détenus par les agents (PSE, équipier INC, chef d'agrès…). Ils déterminent les modules FMPA que chaque agent doit valider.</p>
       {form && (
@@ -81,7 +81,7 @@ export default function Emplois() {
                     <td>{r.periodicite_mois ? `${r.periodicite_mois} mois` : 'Permanent'}</td>
                     <td>{r.heures_fc_annuelles ? `${r.heures_fc_annuelles} h` : '—'}</td>
                     <td>{refs.find((x) => x.id === r.prerequis_id)?.code || '—'}</td>
-                    <td>{d.admin && <button className="link" onClick={() => setForm({ ...r })}>Modifier</button>}</td>
+                    <td>{d.gererFormation && <button className="link" onClick={() => setForm({ ...r })}>Modifier</button>}</td>
                   </tr>
                 ))}
               </tbody>

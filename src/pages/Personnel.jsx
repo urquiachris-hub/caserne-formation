@@ -94,8 +94,8 @@ export default function Personnel() {
       <div className="page-head">
         <h1>Personnel</h1>
         <div className="actions">
-          {d.admin && <button onClick={() => setAjout(true)}>+ Ajouter un agent</button>}
-          {d.admin && <label className="button ghost">Importer CSV<input type="file" accept=".csv" hidden onChange={importer} /></label>}
+          {d.gererFormation && <button onClick={() => setAjout(true)}>+ Ajouter un agent</button>}
+          {d.gererFormation && <label className="button ghost">Importer CSV<input type="file" accept=".csv" hidden onChange={importer} /></label>}
           <button className="ghost" onClick={() => exportCSV('personnel.csv', liste.map(({ qualifications, user_id, ...r }) => r))}>Exporter</button>
         </div>
       </div>
