@@ -125,3 +125,5 @@ tr.inactive td { opacity: .5; }
   .sidebar nav { flex-direction: row; flex-wrap: wrap; }
   .content { padding: 16px; }
 }
+.seg button:disabled { opacity: 1; cursor: default; }
+.sidebar-foot .badge { align-self: flex-start; }
