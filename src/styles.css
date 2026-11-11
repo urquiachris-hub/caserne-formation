@@ -1,6 +1,12 @@
 :root {
-  --rouge: #c62828;
-  --rouge-f: #8e1b1b;
+  /* Charte Ornano : marine, or, rouge */
+  --rouge: #1b2f6e;   /* couleur principale (marine) */
+  --rouge-f: #0f1d4a;
+  --marine: #13235b;
+  --marine-f: #0b1638;
+  --or: #f2c230;
+  --or-f: #d9a514;
+  --rouge-ornano: #c0272d;
   --bg: #f4f5f7;
   --card: #fff;
   --txt: #1f2328;
@@ -22,12 +28,12 @@ a:hover { text-decoration: underline; }
 code { background: #eee; padding: 1px 4px; border-radius: 4px; }
 
 .layout { display: flex; min-height: 100vh; }
-.sidebar { width: 230px; background: #1c1f24; color: #fff; display: flex; flex-direction: column; padding: 20px 12px; position: sticky; top: 0; height: 100vh; }
+.sidebar { width: 236px; background: linear-gradient(180deg, var(--marine) 0%, var(--marine-f) 100%); border-right: 3px solid var(--or); color: #fff; display: flex; flex-direction: column; padding: 20px 12px; position: sticky; top: 0; height: 100vh; }
 .brand { font-weight: 700; font-size: 1.15rem; margin: 0 8px 24px; }
 .sidebar nav { display: flex; flex-direction: column; gap: 4px; }
 .sidebar nav a { color: #cfd3d8; padding: 9px 12px; border-radius: 8px; }
-.sidebar nav a:hover { background: #2b3038; text-decoration: none; }
-.sidebar nav a.active { background: var(--rouge); color: #fff; }
+.sidebar nav a:hover { background: rgba(255,255,255,.08); text-decoration: none; }
+.sidebar nav a.active { background: var(--or); color: var(--marine-f); font-weight: 600; }
 .sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding: 8px; }
 .sidebar-foot small { color: #9aa1a9; word-break: break-all; }
 .sidebar-foot .ghost { color: #fff; border-color: #444; }
@@ -161,4 +167,27 @@ fieldset.emplois legend { font-size: .85rem; color: #444; padding: 0 6px; }
   .sidebar.open nav { flex-direction: column; }
   .filters input:not([type=checkbox]) { min-width: 0; }
   table { font-size: .85rem; }
+}
+
+/* ---------- Charte Ornano ---------- */
+.brand { gap: 10px; justify-content: flex-start; margin-bottom: 26px; }
+.brand-logo { width: 46px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+.brand-txt { display: flex; flex-direction: column; line-height: 1.1; flex: 1; }
+.brand-txt b { color: var(--or); font-size: 1.25rem; letter-spacing: .06em; }
+.brand-txt small { color: #c9d1e6; font-weight: 400; font-size: .8rem; }
+.nav-title { color: var(--or); opacity: .75; }
+.sidebar-foot .badge { background: rgba(242,194,48,.18); color: var(--or); }
+.sidebar-foot .ghost { border-color: rgba(255,255,255,.25); }
+h1 { color: var(--marine); }
+.page-head h1 { border-left: 5px solid var(--or); padding-left: 12px; }
+.tab.active { background: var(--marine); border-color: var(--marine); }
+.kpi { border-top: 3px solid var(--or); }
+.login-page { background: radial-gradient(circle at 50% 20%, #1e3374 0%, var(--marine) 45%, var(--marine-f) 100%); gap: 18px; padding: 24px; }
+.login-logo { width: 150px; filter: drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
+.login { border-top: 4px solid var(--or); max-width: 92vw; }
+.login h1 { text-align: center; }
+@media (max-width: 760px) {
+  .brand { margin-bottom: 0; }
+  .brand-logo { width: 36px; }
+  .sidebar { border-right: none; border-bottom: 3px solid var(--or); }
 }
