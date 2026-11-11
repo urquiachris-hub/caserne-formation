@@ -127,3 +127,38 @@ tr.inactive td { opacity: .5; }
 }
 .seg button:disabled { opacity: 1; cursor: default; }
 .sidebar-foot .badge { align-self: flex-start; }
+
+/* ---------- V3 : référentiels, FMPA, mobile ---------- */
+.nav-title { color: #7d848c; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; margin: 14px 12px 4px; }
+.burger { display: none; background: none; border: none; color: #fff; font-size: 1.4rem; padding: 0 6px; }
+.brand { display: flex; justify-content: space-between; align-items: center; }
+.tabs.big { gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab { padding: 9px 18px; border-radius: 999px; border: 1px solid var(--bord); background: #fff; color: var(--txt); font-weight: 600; }
+.tab:hover { text-decoration: none; background: #eceef1; }
+.tab.active { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+.doc-list { display: flex; flex-direction: column; }
+.doc { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--bord); }
+.doc:last-child { border-bottom: none; }
+.doc.inactive { opacity: .5; }
+.doc-open { flex: 1; display: flex; gap: 12px; align-items: flex-start; text-align: left; background: none; border: none; color: var(--txt); padding: 12px 6px; border-radius: 8px; }
+.doc-open:hover { background: #f6f7f9; }
+.doc-open span { display: flex; flex-direction: column; gap: 2px; }
+.doc-icon { font-size: 1.5rem; }
+.progress { height: 8px; background: #eceef1; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+.progress-bar { height: 100%; border-radius: 999px; transition: width .3s; }
+.progress-bar.ok { background: var(--ok); }
+.progress-bar.warn { background: #e0a020; }
+.progress-bar.ko { background: var(--ko); }
+.kpi-value.small { font-size: 1.4rem; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.modal { width: min(420px, 92vw); }
+fieldset.emplois { border: 1px solid var(--bord); border-radius: 10px; display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 12px; }
+fieldset.emplois legend { font-size: .85rem; color: #444; padding: 0 6px; }
+@media (max-width: 760px) {
+  .burger { display: block; }
+  .sidebar nav, .sidebar-foot { display: none; }
+  .sidebar.open nav, .sidebar.open .sidebar-foot { display: flex; }
+  .sidebar.open nav { flex-direction: column; }
+  .filters input:not([type=checkbox]) { min-width: 0; }
+  table { font-size: .85rem; }
+}

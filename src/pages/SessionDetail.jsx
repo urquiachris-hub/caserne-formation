@@ -19,7 +19,7 @@ export default function SessionDetail() {
 
   async function load() {
     const [a, b, c, d] = await Promise.all([
-      supabase.from('sessions_formation').select('*, referentiels(*), formateur_p:personnel!sessions_formation_formateur_id_fkey(nom, prenom, grade)').eq('id', id).single(),
+      supabase.from('sessions_formation').select('*, referentiels(*), fmpa_modules!sessions_formation_fmpa_module_id_fkey(code, libelle), formateur_p:personnel!sessions_formation_formateur_id_fkey(nom, prenom, grade)').eq('id', id).single(),
       supabase.from('participations').select('*, personnel(id, nom, prenom, grade)').eq('session_id', id),
       supabase.from('personnel').select('id, nom, prenom, grade').eq('actif', true).order('nom'),
       supabase.from('referentiels').select('id, code').eq('actif', true).order('ordre'),
@@ -100,7 +100,8 @@ export default function SessionDetail() {
           <span><b>Début</b> {fmtDateTime(s.date_debut)}</span>
           {s.date_fin && <span><b>Fin</b> {fmtDateTime(s.date_fin)}</span>}
           <span><b>Durée</b> {s.duree_heures} h</span>
-          <span><b>Référentiel</b> {s.referentiels?.code || '—'}</span>
+          <span><b>Module FMPA</b> {s.fmpa_modules ? `${s.fmpa_modules.code} — ${s.fmpa_modules.libelle}` : '—'}</span>
+          {s.referentiels && <span><b>Emploi recyclé</b> {s.referentiels.code}</span>}
           <span><b>Lieu</b> {s.lieu || '—'}</span>
           <span><b>Formateur</b> {s.formateur_p ? `${s.formateur_p.grade ?? ''} ${s.formateur_p.nom.toUpperCase()} ${s.formateur_p.prenom}` : '—'}</span>
           {s.formateur && <span><b>Intervenants</b> {s.formateur}</span>}
@@ -121,6 +122,7 @@ export default function SessionDetail() {
           </div>}
         </div>
         {msg && <div className={`alert ${msg.type}`}>{msg.text}</div>}
+        {s.fmpa_modules && appel && <p className="muted">Les agents marqués « Présent » ont automatiquement le module {s.fmpa_modules.code} validé.</p>}
         <table>
           <thead><tr><th>Agent</th><th>Présence</th><th>Heures validées</th><th></th></tr></thead>
           <tbody>
