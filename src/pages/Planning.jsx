@@ -4,22 +4,26 @@ import { supabase } from '../supabase'
 import { TYPES_SESSION, fmtDateTime } from '../lib'
 import { useAuth } from '../auth'
 
-export const VIDE_SESSION = { titre: '', type: 'FMPA', referentiel_id: '', formateur_id: '', date_debut: '', date_fin: '', duree_heures: 3, lieu: '', formateur: '', places_max: '', description: '' }
+export const VIDE_SESSION = { titre: '', type: 'FMPA', referentiel_id: '', formateur_id: '', fmpa_module_id: '', date_debut: '', date_fin: '', duree_heures: 3, lieu: '', formateur: '', places_max: '', description: '' }
 
 export function SessionForm({ initial, refs, onSaved, onCancel }) {
   const [f, setF] = useState({ ...VIDE_SESSION, ...initial })
   const [err, setErr] = useState(null)
   const [agents, setAgents] = useState([])
+  const [modules, setModules] = useState([])
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   useEffect(() => {
     supabase.from('personnel').select('id, nom, prenom, grade, email').eq('actif', true).order('nom')
       .then(({ data }) => setAgents(data || []))
+    const an = new Date().getFullYear()
+    supabase.from('fmpa_modules').select('id, annee, code, libelle').eq('actif', true).in('annee', [an - 1, an, an + 1])
+      .order('annee', { ascending: false }).order('code').then(({ data }) => setModules(data || []))
   }, [])
 
   async function save(e) {
     e.preventDefault()
     const p = {
-      titre: f.titre, type: f.type, referentiel_id: f.referentiel_id || null, formateur_id: f.formateur_id || null,
+      titre: f.titre, type: f.type, referentiel_id: f.referentiel_id || null, formateur_id: f.formateur_id || null, fmpa_module_id: f.fmpa_module_id || null,
       date_debut: new Date(f.date_debut).toISOString(),
       date_fin: f.date_fin ? new Date(f.date_fin).toISOString() : null,
       duree_heures: Number(f.duree_heures) || 0, lieu: f.lieu || null, formateur: f.formateur || null,
@@ -41,7 +45,13 @@ export function SessionForm({ initial, refs, onSaved, onCancel }) {
             {Object.entries(TYPES_SESSION).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
-        <label>Référentiel lié
+        <label>Module FMPA validé à l'appel
+          <select value={f.fmpa_module_id ?? ''} onChange={set('fmpa_module_id')}>
+            <option value="">— aucun —</option>
+            {modules.map((m) => <option key={m.id} value={m.id}>{m.annee} · {m.code} — {m.libelle}</option>)}
+          </select>
+        </label>
+        <label>Emploi recyclé (optionnel)
           <select value={f.referentiel_id ?? ''} onChange={set('referentiel_id')}>
             <option value="">—</option>
             {refs.map((r) => <option key={r.id} value={r.id}>{r.code}</option>)}
@@ -81,7 +91,7 @@ export default function Planning() {
   const [type, setType] = useState('')
 
   async function load() {
-    let req = supabase.from('sessions_formation').select('*, referentiels(code), participations(statut)')
+    let req = supabase.from('sessions_formation').select('*, referentiels(code), fmpa_modules!sessions_formation_fmpa_module_id_fkey(code), participations(statut)')
     const now = new Date().toISOString()
     req = periode === 'avenir' ? req.gte('date_debut', now).order('date_debut') : req.lt('date_debut', now).order('date_debut', { ascending: false })
     if (type) req = req.eq('type', type)
@@ -121,14 +131,14 @@ export default function Planning() {
         <section className="card" key={mois}>
           <h2 className="cap">{mois}</h2>
           <table>
-            <thead><tr><th>Date</th><th>Intitulé</th><th>Type</th><th>Réf.</th><th>Durée</th><th>Lieu</th><th>Inscrits</th></tr></thead>
+            <thead><tr><th>Date</th><th>Intitulé</th><th>Type</th><th>FMPA</th><th>Durée</th><th>Lieu</th><th>Inscrits</th></tr></thead>
             <tbody>
               {liste.map((s) => (
                 <tr key={s.id}>
                   <td className="nowrap">{fmtDateTime(s.date_debut)}</td>
                   <td><Link to={`/planning/${s.id}`}>{s.titre}</Link></td>
                   <td><span className={`badge type-${s.type}`}>{TYPES_SESSION[s.type]}</span></td>
-                  <td>{s.referentiels?.code || '—'}</td>
+                  <td>{s.fmpa_modules?.code || s.referentiels?.code || '—'}</td>
                   <td>{s.duree_heures} h</td>
                   <td>{s.lieu || '—'}</td>
                   <td>{s.participations.length}{s.places_max ? ` / ${s.places_max}` : ''}
