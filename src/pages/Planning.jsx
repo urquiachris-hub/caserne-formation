@@ -2,18 +2,24 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { TYPES_SESSION, fmtDateTime } from '../lib'
+import { useAuth } from '../auth'
 
-export const VIDE_SESSION = { titre: '', type: 'FMPA', referentiel_id: '', date_debut: '', date_fin: '', duree_heures: 3, lieu: '', formateur: '', places_max: '', description: '' }
+export const VIDE_SESSION = { titre: '', type: 'FMPA', referentiel_id: '', formateur_id: '', date_debut: '', date_fin: '', duree_heures: 3, lieu: '', formateur: '', places_max: '', description: '' }
 
 export function SessionForm({ initial, refs, onSaved, onCancel }) {
   const [f, setF] = useState({ ...VIDE_SESSION, ...initial })
   const [err, setErr] = useState(null)
+  const [agents, setAgents] = useState([])
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+  useEffect(() => {
+    supabase.from('personnel').select('id, nom, prenom, grade, email').eq('actif', true).order('nom')
+      .then(({ data }) => setAgents(data || []))
+  }, [])
 
   async function save(e) {
     e.preventDefault()
     const p = {
-      titre: f.titre, type: f.type, referentiel_id: f.referentiel_id || null,
+      titre: f.titre, type: f.type, referentiel_id: f.referentiel_id || null, formateur_id: f.formateur_id || null,
       date_debut: new Date(f.date_debut).toISOString(),
       date_fin: f.date_fin ? new Date(f.date_fin).toISOString() : null,
       duree_heures: Number(f.duree_heures) || 0, lieu: f.lieu || null, formateur: f.formateur || null,
@@ -50,7 +56,13 @@ export function SessionForm({ initial, refs, onSaved, onCancel }) {
       </div>
       <div className="row">
         <label>Lieu<input value={f.lieu ?? ''} onChange={set('lieu')} /></label>
-        <label>Formateur(s)<input value={f.formateur ?? ''} onChange={set('formateur')} /></label>
+        <label>Formateur responsable (fait l'appel)
+          <select value={f.formateur_id ?? ''} onChange={set('formateur_id')}>
+            <option value="">—</option>
+            {agents.map((a) => <option key={a.id} value={a.id}>{a.grade} {a.nom.toUpperCase()} {a.prenom}{a.email ? '' : ' (sans email)'}</option>)}
+          </select>
+        </label>
+        <label>Autres formateurs / intervenants<input value={f.formateur ?? ''} onChange={set('formateur')} /></label>
       </div>
       <label>Description / objectifs<textarea rows="2" value={f.description ?? ''} onChange={set('description')} /></label>
       {err && <div className="alert ko">{err}</div>}
@@ -60,6 +72,8 @@ export function SessionForm({ initial, refs, onSaved, onCancel }) {
 }
 
 export default function Planning() {
+  const { d, personnelId } = useAuth()
+  const [mesSessions, setMesSessions] = useState(false)
   const [sessions, setSessions] = useState([])
   const [refs, setRefs] = useState([])
   const [ajout, setAjout] = useState(false)
@@ -71,10 +85,11 @@ export default function Planning() {
     const now = new Date().toISOString()
     req = periode === 'avenir' ? req.gte('date_debut', now).order('date_debut') : req.lt('date_debut', now).order('date_debut', { ascending: false })
     if (type) req = req.eq('type', type)
+    if (mesSessions && personnelId) req = req.eq('formateur_id', personnelId)
     const [{ data }, r] = await Promise.all([req, supabase.from('referentiels').select('id, code').eq('actif', true).order('ordre')])
     setSessions(data || []); setRefs(r.data || [])
   }
-  useEffect(() => { load() }, [periode, type])
+  useEffect(() => { load() }, [periode, type, mesSessions])
 
   // Regroupement par mois
   const parMois = {}
@@ -87,7 +102,7 @@ export default function Planning() {
     <>
       <div className="page-head">
         <h1>Planning de formation & FMPA</h1>
-        <button onClick={() => setAjout(true)}>+ Nouvelle session</button>
+        {d.gererFormation && <button onClick={() => setAjout(true)}>+ Nouvelle session</button>}
       </div>
       {ajout && <SessionForm refs={refs} onSaved={() => { setAjout(false); load() }} onCancel={() => setAjout(false)} />}
       <div className="filters">
@@ -95,6 +110,7 @@ export default function Planning() {
           <button className={periode === 'avenir' ? '' : 'ghost'} onClick={() => setPeriode('avenir')}>À venir</button>
           <button className={periode === 'passe' ? '' : 'ghost'} onClick={() => setPeriode('passe')}>Passées</button>
         </div>
+        {personnelId && <label className="check"><input type="checkbox" checked={mesSessions} onChange={(e) => setMesSessions(e.target.checked)} /> Seulement les sessions que j'anime</label>}
         <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="">Tous types</option>
           {Object.entries(TYPES_SESSION).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
