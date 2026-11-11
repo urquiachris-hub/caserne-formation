@@ -3,10 +3,13 @@ import { NavLink, Route, Routes, Navigate } from 'react-router-dom'
 import { supabase, isConfigured } from './supabase'
 import { AuthCtx, droits, ROLES } from './auth'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
+import Documents from './pages/Documents'
+import MesFMPA, { FmpaAgentRoute } from './pages/MesFMPA'
+import SuiviFMPA from './pages/SuiviFMPA'
+import ModulesFMPA from './pages/ModulesFMPA'
 import Personnel from './pages/Personnel'
 import AgentFiche from './pages/AgentFiche'
-import Referentiels from './pages/Referentiels'
+import Emplois from './pages/Emplois'
 import Matrice from './pages/Matrice'
 import Planning from './pages/Planning'
 import SessionDetail from './pages/SessionDetail'
@@ -14,6 +17,7 @@ import SessionDetail from './pages/SessionDetail'
 export default function App() {
   const [session, setSession] = useState(undefined)
   const [acces, setAcces] = useState(null) // { role, personnelId }
+  const [menu, setMenu] = useState(false)
 
   useEffect(() => {
     if (!isConfigured) return
@@ -53,20 +57,32 @@ export default function App() {
 
   const d = droits(acces.role)
   const ctx = { ...acces, d }
-  const accueil = d.lireTout ? '/' : acces.personnelId ? '/mon-suivi' : '/planning'
+  const fermer = () => setMenu(false)
 
   return (
     <AuthCtx.Provider value={ctx}>
       <div className="layout">
-        <aside className="sidebar">
-          <div className="brand">🚒 Suivi formation</div>
-          <nav>
-            {d.lireTout && <NavLink to="/" end>Tableau de bord</NavLink>}
-            {acces.personnelId && <NavLink to="/mon-suivi">Mon suivi</NavLink>}
-            {d.lireTout && <NavLink to="/personnel">Personnel</NavLink>}
-            {d.lireTout && <NavLink to="/matrice">Matrice compétences</NavLink>}
-            <NavLink to="/planning">Planning & FMPA</NavLink>
+        <aside className={`sidebar ${menu ? 'open' : ''}`}>
+          <div className="brand">
+            🚒 Suivi formation
+            <button className="burger" onClick={() => setMenu(!menu)} aria-label="Menu">☰</button>
+          </div>
+          <nav onClick={fermer}>
             <NavLink to="/referentiels">Référentiels</NavLink>
+            {acces.personnelId && <NavLink to="/mes-fmpa">Mes FMPA</NavLink>}
+            <NavLink to="/planning">Planning</NavLink>
+            {d.lireTout && <>
+              <div className="nav-title">Suivi de la formation</div>
+              <NavLink to="/suivi">Suivi des FMPA</NavLink>
+              <NavLink to="/matrice">Matrice des emplois</NavLink>
+              <NavLink to="/personnel">Personnel</NavLink>
+            </>}
+            {d.gererFormation && <>
+              <div className="nav-title">Paramétrage</div>
+              <NavLink to="/modules-fmpa">Modules FMPA</NavLink>
+              <NavLink to="/emplois">Emplois & qualifications</NavLink>
+            </>}
+            {acces.personnelId && <NavLink to="/mon-dossier">Mon dossier</NavLink>}
           </nav>
           <div className="sidebar-foot">
             <small>{session.user.email}</small>
@@ -76,15 +92,20 @@ export default function App() {
         </aside>
         <main className="content">
           <Routes>
-            {d.lireTout && <Route path="/" element={<Dashboard />} />}
-            {d.lireTout && <Route path="/personnel" element={<Personnel />} />}
-            {d.lireTout && <Route path="/matrice" element={<Matrice />} />}
-            <Route path="/personnel/:id" element={<AgentFiche />} />
-            {acces.personnelId && <Route path="/mon-suivi" element={<AgentFiche id={acces.personnelId} monSuivi />} />}
+            <Route path="/referentiels" element={<Navigate to="/referentiels/SUAP" replace />} />
+            <Route path="/referentiels/:cat" element={<Documents />} />
+            {acces.personnelId && <Route path="/mes-fmpa" element={<MesFMPA />} />}
+            {acces.personnelId && <Route path="/mon-dossier" element={<AgentFiche id={acces.personnelId} monSuivi />} />}
             <Route path="/planning" element={<Planning />} />
             <Route path="/planning/:id" element={<SessionDetail />} />
-            <Route path="/referentiels" element={<Referentiels />} />
-            <Route path="*" element={<Navigate to={accueil} />} />
+            <Route path="/personnel/:id" element={<AgentFiche />} />
+            {d.lireTout && <Route path="/suivi" element={<SuiviFMPA />} />}
+            {d.lireTout && <Route path="/suivi/:id" element={<FmpaAgentRoute />} />}
+            {d.lireTout && <Route path="/matrice" element={<Matrice />} />}
+            {d.lireTout && <Route path="/personnel" element={<Personnel />} />}
+            {d.gererFormation && <Route path="/modules-fmpa" element={<ModulesFMPA />} />}
+            {d.gererFormation && <Route path="/emplois" element={<Emplois />} />}
+            <Route path="*" element={<Navigate to="/referentiels/SUAP" replace />} />
           </Routes>
         </main>
       </div>
