@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
+import { LOGO } from '../logo'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -30,9 +31,10 @@ export default function Login() {
   }
 
   return (
-    <div className="center">
+    <div className="center login-page">
+      <img src={LOGO} alt="Écusson Ornano" className="login-logo" />
       <form className="card login" onSubmit={submit}>
-        <h1>🚒 Suivi formation</h1>
+        <h1>Suivi formation</h1>
         <p className="muted">Saisissez votre adresse email : vous recevrez un lien de connexion (pas de mot de passe).</p>
         <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
         {msg && <div className={`alert ${msg.type}`}>{msg.text}</div>}

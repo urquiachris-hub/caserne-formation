@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes, Navigate } from 'react-router-dom'
 import { supabase, isConfigured } from './supabase'
 import { AuthCtx, droits, ROLES } from './auth'
+import { LOGO } from './logo'
 import Login from './pages/Login'
 import Documents from './pages/Documents'
 import MesFMPA, { FmpaAgentRoute } from './pages/MesFMPA'
@@ -64,7 +65,8 @@ export default function App() {
       <div className="layout">
         <aside className={`sidebar ${menu ? 'open' : ''}`}>
           <div className="brand">
-            🚒 Suivi formation
+            <img src={LOGO} alt="Ornano" className="brand-logo" />
+            <div className="brand-txt"><b>ORNANO</b><small>Suivi formation</small></div>
             <button className="burger" onClick={() => setMenu(!menu)} aria-label="Menu">☰</button>
           </div>
           <nav onClick={fermer}>
