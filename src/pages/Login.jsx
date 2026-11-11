@@ -14,8 +14,15 @@ export default function Login() {
       options: { emailRedirectTo: window.location.origin + window.location.pathname },
     })
     if (error) {
-      const refus = /non autoris|database error|not allowed|signups not allowed/i.test(error.message)
-      setMsg({ type: 'ko', text: refus ? "Cette adresse n'est pas autorisée. Contactez l'administrateur." : error.message })
+      // L'adresse hors liste blanche est refusée par la base (erreur 500 / P0001)
+      const refus = error.status >= 500 || /non autoris|database error|not allowed|signups not allowed|^\{\}$/i.test(error.message || '')
+      const tropDeDemandes = error.status === 429
+      setMsg({
+        type: 'ko',
+        text: refus ? "Cette adresse n'est pas autorisée. Contactez l'administrateur."
+          : tropDeDemandes ? 'Trop de demandes. Patientez quelques minutes avant de redemander un lien.'
+          : error.message,
+      })
     } else {
       setMsg({ type: 'ok', text: 'Lien de connexion envoyé ! Ouvrez votre boîte mail sur cet appareil et cliquez sur le lien.' })
     }
