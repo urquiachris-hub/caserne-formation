@@ -33,6 +33,6 @@ export function exportCSV(filename, rows) {
   a.click()
 }
 
-export const CATEGORIES_DOC = { SUAP: 'SUAP', INC: 'Incendie', TOP: 'TOP', FDC: 'Formation du centre' }
+export const CATEGORIES_DOC = { SUAP: 'Secourisme', INC: 'Incendie', FDC: 'Formation' }
 export const DOMAINES_FMPA = { SUAP: 'SUAP', INC: 'Incendie', TOP: 'TOP', AUTRE: 'Autre' }
 export const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
