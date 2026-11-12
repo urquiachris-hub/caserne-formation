@@ -14,6 +14,7 @@ import Emplois from './pages/Emplois'
 import Matrice from './pages/Matrice'
 import Planning from './pages/Planning'
 import SessionDetail from './pages/SessionDetail'
+import Synchro from './pages/Synchro'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -83,6 +84,7 @@ export default function App() {
               <div className="nav-title">Paramétrage</div>
               <NavLink to="/modules-fmpa">Modules FMPA</NavLink>
               <NavLink to="/emplois">Emplois & qualifications</NavLink>
+              <NavLink to="/synchro">Synchronisation Drive</NavLink>
             </>}
             {acces.personnelId && <NavLink to="/mon-dossier">Mon dossier</NavLink>}
           </nav>
@@ -107,6 +109,7 @@ export default function App() {
             {d.lireTout && <Route path="/personnel" element={<Personnel />} />}
             {d.gererFormation && <Route path="/modules-fmpa" element={<ModulesFMPA />} />}
             {d.gererFormation && <Route path="/emplois" element={<Emplois />} />}
+            {d.gererFormation && <Route path="/synchro" element={<Synchro />} />}
             <Route path="*" element={<Navigate to="/referentiels/SUAP" replace />} />
           </Routes>
         </main>
