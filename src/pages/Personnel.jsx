@@ -41,6 +41,8 @@ export function AgentForm({ initial, onSaved, onCancel }) {
       <div className="row">
         <label>Email<input type="email" value={f.email ?? ''} onChange={set('email')} /></label>
         <label>Téléphone<input value={f.telephone ?? ''} onChange={set('telephone')} /></label>
+        <label className="check"><input type="checkbox" checked={f.chef_agres ?? false} onChange={set('chef_agres')} /> Chef d'agrès</label>
+        <label className="check"><input type="checkbox" checked={f.formateur ?? false} onChange={set('formateur')} /> Formateur</label>
         <label className="check"><input type="checkbox" checked={f.actif} onChange={set('actif')} /> Actif</label>
       </div>
       {err && <div className="alert ko">{err}</div>}
@@ -107,12 +109,12 @@ export default function Personnel() {
       </div>
       <div className="card">
         <table>
-          <thead><tr><th>Nom</th><th>Prénom</th><th>Grade</th><th>Statut</th><th>Matricule</th><th>Qualifs</th></tr></thead>
+          <thead><tr><th>Nom</th><th>Prénom</th><th>Grade</th><th>Statut</th><th>Rôles</th><th>Qualifs</th></tr></thead>
           <tbody>
             {liste.map((a) => (
               <tr key={a.id} className={a.actif ? '' : 'inactive'}>
                 <td><Link to={`/personnel/${a.id}`}>{a.nom.toUpperCase()}</Link></td>
-                <td>{a.prenom}</td><td>{a.grade}</td><td>{a.statut}</td><td>{a.matricule}</td>
+                <td>{a.prenom}</td><td>{a.grade}</td><td>{a.statut}</td><td>{[a.chef_agres && 'CA', a.formateur && 'Formateur'].filter(Boolean).join(' · ')}</td>
                 <td>{a.qualifications?.[0]?.count ?? 0}</td>
               </tr>
             ))}

@@ -4,7 +4,8 @@ import { supabase } from '../supabase'
 import { useAuth } from '../auth'
 import { CATEGORIES_DOC, fmtDate } from '../lib'
 
-const VIDE = { titre: '', theme: '', description: '', version: '', date_maj: '', ordre: 100, actif: true }
+const VIDE = { titre: '', theme: '', description: '', version: '', date_maj: '', ordre: 100, actif: true, visibilite: 'tous' }
+const VISIBILITES = { tous: 'Tous les agents', chefs: "Chefs d'agrès", formateurs: 'Formateurs' }
 
 function nomFichier(nom) {
   return nom.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '_')
@@ -48,7 +49,7 @@ export default function Documents() {
     if (!fichier_path) { setBusy(false); return setMsg({ type: 'ko', text: 'Joignez un fichier PDF.' }) }
     const p = {
       categorie: cat, titre: form.titre, theme: form.theme || null, description: form.description || null,
-      version: form.version || null, date_maj: form.date_maj || null, ordre: Number(form.ordre) || 100,
+      version: form.version || null, date_maj: form.date_maj || null, ordre: Number(form.ordre) || 100, visibilite: form.visibilite || 'tous',
       actif: form.actif, fichier_path, fichier_nom,
     }
     const { error } = form.id
@@ -74,13 +75,14 @@ export default function Documents() {
     <>
       <div className="page-head">
         <h1>Référentiels</h1>
-        {d.gererFormation && !form && <button onClick={() => { setForm({ ...VIDE }); setFichier(null) }}>+ Ajouter un référentiel</button>}
+        {d.gererFormation && !form && <button className="ghost" onClick={() => { setForm({ ...VIDE }); setFichier(null) }}>+ Ajouter hors Drive</button>}
       </div>
       <div className="tabs big">
         {Object.entries(CATEGORIES_DOC).map(([k, v]) => <NavLink key={k} to={`/referentiels/${k}`} className="tab">{v}</NavLink>)}
       </div>
 
       {msg && <div className={`alert ${msg.type}`}>{msg.text}</div>}
+      {d.gererFormation && <p className="muted">Les référentiels se déposent dans le Drive « Application Ornano » (voir le LISEZ-MOI) : l'application les récupère chaque nuit ou via « Synchronisation Drive ».</p>}
 
       {form && (
         <form className="card form" onSubmit={save}>
@@ -95,6 +97,11 @@ export default function Documents() {
           <div className="row">
             <label>Version<input value={form.version ?? ''} onChange={(e) => setForm({ ...form, version: e.target.value })} placeholder="Édition 2026" /></label>
             <label>Date de mise à jour<input type="date" value={form.date_maj ?? ''} onChange={(e) => setForm({ ...form, date_maj: e.target.value })} /></label>
+            <label>Visible par
+              <select value={form.visibilite ?? 'tous'} onChange={(e) => setForm({ ...form, visibilite: e.target.value })}>
+                {Object.entries(VISIBILITES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </label>
             <label>Ordre<input type="number" value={form.ordre} onChange={(e) => setForm({ ...form, ordre: e.target.value })} /></label>
             <label className="check"><input type="checkbox" checked={form.actif} onChange={(e) => setForm({ ...form, actif: e.target.checked })} /> Visible</label>
           </div>
@@ -124,11 +131,12 @@ export default function Documents() {
                   <span className="doc-icon">📄</span>
                   <span>
                     <b>{x.titre}</b>
-                    <small className="muted">{[x.version, x.date_maj && `MAJ ${fmtDate(x.date_maj)}`].filter(Boolean).join(' · ')}</small>
+                    <small className="muted">{[x.version, x.date_maj && `MAJ ${fmtDate(x.date_maj)}`].filter(Boolean).join(' · ')}
+                      {x.visibilite !== 'tous' && <span className="badge" style={{ marginLeft: 6 }}>{VISIBILITES[x.visibilite]}</span>}</small>
                     {x.description && <small>{x.description}</small>}
                   </span>
                 </button>
-                {d.gererFormation && (
+                {d.gererFormation && !x.drive_file_id && (
                   <span className="nowrap">
                     <button className="link" onClick={() => { setForm({ ...x }); setFichier(null); window.scrollTo(0, 0) }}>Modifier</button>
                     <button className="link danger" onClick={() => supprimer(x)}>Suppr.</button>
