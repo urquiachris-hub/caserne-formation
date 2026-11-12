@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "node scripts/icones.mjs && vite build",
+    "preview": "vite preview",
+    "icones": "node scripts/icones.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.0"
+    "vite": "^5.4.0",
+    "@resvg/resvg-js": "^2.6.2"
   }
 }
